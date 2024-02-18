@@ -219,29 +219,30 @@ void ANFOutput(std::list<unsigned int>& list)
 
 int main()
 {
-    /*std::mt19937 random_engine;
+    std::mt19937 random_engine;
     random_engine.seed(std::time(nullptr));
+
+    for(int n = 2; n <= 5; n++){
+        BF bf(n, random_engine);
+        int w = bf.GetWeight();
+        std::cout<< n << ": "<< w << std::endl;
+    }
+
     for(int n = 1; n < 10; n++){
         BF bf(5, random_engine);
         int w = bf.GetWeight();
-        double kn = (double)w / (double)(sqr2(5));
-        std::cout<< n << ": "<< w <<"/"<< sqr2(5)<< " = " << kn<<std::endl;     
+        unsigned int sqrn = sqr2(5);
+        double kn = (double)w / sqrn;   
         std::cout<<bf<<std::endl;
+    }
+
+    /*for(int n = 2; n < 32; n++){
+        BF bf(n, random_engine);
+        int w = bf.GetWeight();
+        unsigned int sqrn = sqr2(n);
+        double kn = (double)w / sqrn;
+        std::cout<< n << ": "<< w <<"/"<< sqrn<< " = " << kn<<std::endl;     
+        //std::cout<<bf<<std::endl;
     }*/
-
-    const char* str = "111110000101111111000011111000010111011";
-    BF bf(str);
-    std::cout<<bf;
-    std::list<unsigned int> anf = bf.ANF();
-    ANFOutput(anf);
-
-    BF newBF(anf);
-
-    std::cout<<newBF;
-
-    if(newBF == bf) std::cout<<"Success";
-
-    /*std::list<unsigned int> res = bf.ANF();
-    ANFOutput(res);*/
 
 }
