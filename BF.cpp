@@ -90,16 +90,21 @@ BF::BF(std::string s)
 BF::BF(std::list<unsigned int>& anf)
 {
     unsigned int num = anf.back();
-    num = Log2(num - 1) + 1;
-    BF newBF(num);
-    unsigned int mask = 1;
+    auto size = anf.size();
+    n = size > 1 ? (size + maxN - 1) : Log2(Log2(num)) + 1;
+    nw = size;   
+    f = new unsigned int[nw];
+    unsigned int mask = 0xFFFFFFFF;
+    int idx = 0;
     for(auto const &x: anf)
     {
-        unsigned int idx = (x >> maxN);
-        mask = 1 << (x % base_size);
-        newBF.f[idx] |= mask;
+        f[idx] = x;
+        idx++;
     }
-    *this = newBF;
+    if(n < maxN) {
+        mask = ~(mask << sqr2(n)); 
+        f[0] &= mask;
+    }
 }
 
 BF::~BF()
@@ -222,19 +227,26 @@ int main()
     std::mt19937 random_engine;
     random_engine.seed(std::time(nullptr));
 
-    for(int n = 2; n <= 5; n++){
+    auto list = std::list<unsigned int>();
+    list.push_back(3);
+    list.push_back(255);
+
+    BF bf(list);
+    std::cout<<bf;
+
+    /*for(int n = 2; n <= 5; n++){
         BF bf(n, random_engine);
         int w = bf.GetWeight();
         std::cout<< n << ": "<< w << std::endl;
-    }
+    }*/
 
-    for(int n = 1; n < 10; n++){
+    /*for(int n = 1; n < 10; n++){
         BF bf(5, random_engine);
         int w = bf.GetWeight();
         unsigned int sqrn = sqr2(5);
         double kn = (double)w / sqrn;   
         std::cout<<bf<<std::endl;
-    }
+    }*/
 
     /*for(int n = 2; n < 32; n++){
         BF bf(n, random_engine);
