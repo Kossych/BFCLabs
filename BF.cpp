@@ -90,20 +90,15 @@ BF::BF(std::string s)
 BF::BF(std::list<unsigned int>& anf)
 {
     unsigned int num = anf.back();
-    auto size = anf.size();
-    n = size > 1 ? (size + maxN - 1) : Log2(Log2(num)) + 1;
-    nw = size;   
+    n = Log2(num) + 1;
+    nw = (num >> maxN) + 1;   
     f = new unsigned int[nw];
-    unsigned int mask = 0xFFFFFFFF;
-    int idx = 0;
+    for(int i = 0; i < nw; i++) {
+        f[i] = 0;
+    }
     for(auto const &x: anf)
     {
-        f[idx] = x;
-        idx++;
-    }
-    if(n < maxN) {
-        mask = ~(mask << sqr2(n)); 
-        f[0] &= mask;
+        f[x >> maxN] |= (((unsigned int)1) << (x % base_size));
     }
 }
 
@@ -228,8 +223,7 @@ int main()
     random_engine.seed(std::time(nullptr));
 
     auto list = std::list<unsigned int>();
-    list.push_back(3);
-    list.push_back(255);
+    list.push_back(4);
 
     BF bf(list);
     std::cout<<bf;
