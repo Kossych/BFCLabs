@@ -5,10 +5,10 @@
 #include <iterator>
 
 
-unsigned int sqr2(int n)
+unsigned int pow2(int n)
 {
     if(n < 1) return 1;
-    return (1 << n);
+    return (1LL << n);
 }
 
 unsigned int Log2(int x)
@@ -33,7 +33,7 @@ BF::BF()
 BF::BF(int count, std::mt19937&random_engine)
 {
     if(count<1) throw std::invalid_argument("The function must contain more than 1 variable");
-    nw = sqr2(count - maxN);
+    nw = pow2(count - maxN);
     n = count;
     f = new unsigned int[nw];  
     for(int i = 0; i < nw; i++)
@@ -43,20 +43,23 @@ BF::BF(int count, std::mt19937&random_engine)
     if(n < maxN)
     {
         unsigned int mask = 0xFFFFFFFF;
-        mask = ~(mask << sqr2(n)); 
+        mask = ~(mask << pow2(n)); 
         f[0] &= mask;
     }
 }
 
-BF::BF(int count, unsigned int value = 0)
+BF::BF(int count)
 {   
-    if(count<1) throw std::invalid_argument("The function must contain more than 1 variable");
-    nw = sqr2(count - maxN);
+    if(count < 1) throw std::invalid_argument("The function must contain more than 1 variable");
+
+    nw = pow2(count - maxN);
     n = count;
     f = new unsigned int[nw];
-    for(int i = 0; i < nw; i++) f[i] = 0;
-    f[0] = value;
-    
+
+    for(int i = 0; i < nw; i++) f[i] = 0xFFFFFFFF;
+    if(n < maxN) {
+        f[0] = ~(f[0] << pow2(n));
+    }
 }
 
 BF::BF(BF& bf_copy)
@@ -74,6 +77,7 @@ BF::BF(std::string s)
 {
     int number_of_values = s.length();
     if(number_of_values < 1) throw std::invalid_argument("Incorrect string");
+    if(number_of_values & (number_of_values - 1) != 0) throw std::invalid_argument("Length must be a power of two");
     nw = ((number_of_values - 1) >> maxN) + 1;
     n = Log2(number_of_values - 1) + 1;
     f = new unsigned int[nw];
@@ -109,7 +113,7 @@ BF::~BF()
 
 std::ostream& operator <<(std::ostream &out, BF& bf)
 {
-    unsigned int bits = sqr2(bf.n);
+    unsigned int bits = pow2(bf.n);
     unsigned int mask = 1;
     out<<"f = (";
     for(int i = 0; i < bits; i++)
@@ -146,7 +150,7 @@ bool BF::operator ==(BF& bf)
 
 int BF::GetWeight()
 {
-    int no_low_bit,
+    unsigned int no_low_bit,
         weight = 0;
     for(int i = 0; i < nw; i++)
     {
@@ -165,7 +169,7 @@ std::list<unsigned int> BF::ANF()
     std::list<unsigned int> res;
     unsigned int u = 0;
     unsigned int mask = 1;
-    int val = sqr2(n);
+    int val = pow2(n);
     for(; u < val; u++)
     {
         int idx = u >> maxN;
@@ -216,39 +220,38 @@ void ANFOutput(std::list<unsigned int>& list)
     std::cout<<std::endl;
 }
 
+void lab1(std::mt19937&random_engine) {
+    for(int n = 2; n <= 10; n++){
+        BF bf(n);
+        int w = bf.GetWeight();
+        std::cout<< n << ": "<< w << std::endl;
+    }
+
+    for(int n = 1; n < 10; n++){
+        BF bf(5, random_engine);
+        int w = bf.GetWeight();
+        unsigned int sqrn = pow2(5);
+        double kn = (double)w / sqrn;   
+        std::cout<<bf<<std::endl;
+    }
+
+   /* for(int n = 2; n < 32; n++){
+        BF bf(n, random_engine);
+        int w = bf.GetWeight();
+        unsigned int sqrn = pow2(n);
+        double kn = (double)w / sqrn;
+        std::cout<< n << ": "<< w <<"/"<< sqrn<< " = " << kn<<std::endl;     
+        //std::cout<<bf<<std::endl;
+    }*/
+}
 
 int main()
 {
     std::mt19937 random_engine;
     random_engine.seed(std::time(nullptr));
 
-    auto list = std::list<unsigned int>();
-    list.push_back(4);
+    //BF bf("1010");
+    //std::cout<<bf;
 
-    BF bf(list);
-    std::cout<<bf;
-
-    /*for(int n = 2; n <= 5; n++){
-        BF bf(n, random_engine);
-        int w = bf.GetWeight();
-        std::cout<< n << ": "<< w << std::endl;
-    }*/
-
-    /*for(int n = 1; n < 10; n++){
-        BF bf(5, random_engine);
-        int w = bf.GetWeight();
-        unsigned int sqrn = sqr2(5);
-        double kn = (double)w / sqrn;   
-        std::cout<<bf<<std::endl;
-    }*/
-
-    /*for(int n = 2; n < 32; n++){
-        BF bf(n, random_engine);
-        int w = bf.GetWeight();
-        unsigned int sqrn = sqr2(n);
-        double kn = (double)w / sqrn;
-        std::cout<< n << ": "<< w <<"/"<< sqrn<< " = " << kn<<std::endl;     
-        //std::cout<<bf<<std::endl;
-    }*/
-
+    lab1(random_engine);
 }

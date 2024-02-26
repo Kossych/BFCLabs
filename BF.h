@@ -21,7 +21,7 @@ class BF {
     public:
         BF();
         BF(int count, std::mt19937&);
-        BF(int count, unsigned int value);
+        BF(int count);
         BF(BF &); 
         BF(std::string s);
         BF(std::list<unsigned int>&);
