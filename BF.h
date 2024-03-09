@@ -21,7 +21,7 @@ class BF {
     public:
         BF();
         BF(int count, std::mt19937&);
-        BF(int count);
+        BF(int count, bool);
         BF(BF &); 
         BF(std::string s);
         BF(std::list<unsigned int>&);
@@ -31,8 +31,7 @@ class BF {
         int GetWeight();
         ~BF();
         std::list<unsigned int> ANF();
-        BF& MobiusTransform(std::list<unsigned int>&);
-        
+        BF MobiusTransform();
 
 };
 

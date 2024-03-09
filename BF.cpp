@@ -48,7 +48,7 @@ BF::BF(int count, std::mt19937&random_engine)
     }
 }
 
-BF::BF(int count)
+BF::BF(int count, bool isFilled = true)
 {   
     if(count < 1) throw std::invalid_argument("The function must contain more than 1 variable");
 
@@ -56,8 +56,14 @@ BF::BF(int count)
     n = count;
     f = new unsigned int[nw];
 
-    for(int i = 0; i < nw; i++) f[i] = 0xFFFFFFFF;
-    if(n < maxN) {
+    unsigned int mask = 0;
+    
+    if(isFilled){
+        mask = 0xFFFFFFFF;
+    }
+
+    for(int i = 0; i < nw; i++) f[i] = mask;
+    if(n < maxN && isFilled) {
         f[0] = ~(f[0] << pow2(n));
     }
 }
@@ -182,20 +188,30 @@ std::list<unsigned int> BF::ANF()
     return res;
 }
 
-BF& BF::MobiusTransform(std::list<unsigned int>& anf)
+BF BF::MobiusTransform()
 {
-    unsigned int num = anf.back();
-    num = Log2(num - 1) + 1;//deg(f)
-    BF newBF(num);
-    unsigned int mask = 1;
-    for(auto const &x: anf)
+    BF res(this->n, false);
+
+    int count = pow2(n);
+    
+    unsigned int* fCopy = new unsigned int[nw];
+    for(int i = 0; i < nw; i++)
+        fCopy[i] = this->f[i];
+    
+    res.f[0] |= (fCopy[0] & 1);
+    for(int i = 1; i < count; i++) 
     {
-        unsigned int idx = (x >> maxN);
-        mask = 1 << (x % base_size);
-        newBF.f[idx] |= mask;
+        unsigned int bit = 0;
+        for(int j = 0; j < nw - 1; j++) 
+        {
+            bit = fCopy[j + 1] & 1;
+            fCopy[j] = fCopy[j] ^ ((fCopy[j] >> 1) | (bit << (base_size - 1)));
+        }
+        fCopy[nw - 1] = fCopy[nw - 1] ^ (fCopy[nw - 1] >> 1);
+
+        res.f[i/base_size] |= ((fCopy[0] & 1) << (i % base_size));
     }
-    *this = newBF;
-    return *this;
+    return res;
 }
 
 void ANFOutput(std::list<unsigned int>& list)
@@ -245,6 +261,14 @@ void lab1(std::mt19937&random_engine) {
     }*/
 }
 
+void lab2(std::mt19937&random_engine) {
+    BF bf("00111000");
+    bf = bf.MobiusTransform();
+    std::cout<<bf<<std::endl;
+    auto anf = bf.ANF();
+    ANFOutput(anf);
+}
+
 int main()
 {
     std::mt19937 random_engine;
@@ -253,5 +277,5 @@ int main()
     //BF bf("1010");
     //std::cout<<bf;
 
-    lab1(random_engine);
+    lab2(random_engine);
 }
