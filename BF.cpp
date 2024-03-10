@@ -170,24 +170,6 @@ int BF::GetWeight()
     return weight;
 }
 
-std::list<unsigned int> BF::ANF()
-{
-    std::list<unsigned int> res;
-    unsigned int u = 0;
-    unsigned int mask = 1;
-    int val = pow2(n);
-    for(; u < val; u++)
-    {
-        int idx = u >> maxN;
-        mask = 1 << u;
-        if((f[idx] & mask) == mask)
-        {
-            res.push_back(u);
-        }
-    }
-    return res;
-}
-
 BF BF::MobiusTransform()
 {
     BF res(this->n, false);
@@ -214,27 +196,30 @@ BF BF::MobiusTransform()
     return res;
 }
 
-void ANFOutput(std::list<unsigned int>& list)
+
+void BF::ANFPrint()
 {
-    std::list<unsigned int>::iterator x = list.begin();
-    if(*x == 0)
-    { 
-        std::cout<<"1";
-        x++;
-    }
-    for(; x != list.end(); x++) 
+    int monomialCount = pow2(n);
+    bool isPrinted = false;
+    if(f[0] & 1) 
     {
-        if(x != list.begin()) std::cout<<" + ";
-        unsigned int mask = 1;
-        for(int bit = 0; bit < base_size; bit++)
-        {
-            mask = 1 << bit;
-            if(((*x) & mask) == mask) std::cout<<"x"<< (bit+1);
-        }
-        
+        std::cout<<"1";
+        isPrinted = true;
     }
-    std::cout<<std::endl;
+    for(int i = 1; i < monomialCount; i++)
+    {
+        if(f[i / base_size] & (1 << (i % base_size))) 
+        {
+            if(isPrinted) std::cout << " + ";
+            isPrinted = true;
+            for(int bit = 0; bit < n; bit++) 
+            {
+                if(i & (1 << bit))  std::cout << "x" << (bit + 1);
+            }
+        }
+    }
 }
+
 
 void lab1(std::mt19937&random_engine) {
     for(int n = 2; n <= 10; n++){
@@ -265,8 +250,7 @@ void lab2(std::mt19937&random_engine) {
     BF bf("00111000");
     bf = bf.MobiusTransform();
     std::cout<<bf<<std::endl;
-    auto anf = bf.ANF();
-    ANFOutput(anf);
+    bf.ANFPrint();
 }
 
 int main()

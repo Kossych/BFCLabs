@@ -30,9 +30,9 @@ class BF {
         bool operator ==(BF &); 
         int GetWeight();
         ~BF();
-        std::list<unsigned int> ANF();
+        void ANFPrint();
         BF MobiusTransform();
-
+        int GetDegree();
 };
 
 #endif 
