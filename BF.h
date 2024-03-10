@@ -33,6 +33,9 @@ class BF {
         void ANFPrint();
         BF MobiusTransform();
         int GetDegree();
+        int GetDegreeForce();
+    private:
+        bool GetDegreeRec(int currentMonom, int shift, int leftLimit, int rightLimit);
 };
 
 #endif 

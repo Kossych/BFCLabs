@@ -3,6 +3,7 @@
 #include <ctime>
 
 #include <iterator>
+#include <chrono>
 
 
 unsigned int pow2(int n)
@@ -24,10 +25,10 @@ unsigned int Log2(int x)
 
 BF::BF()
 {
-    f = new unsigned int();
-    for(int i = 0; i < nw; i++) f[i] = 0;
     nw = 1;
     n = 1;
+    f = new unsigned int();
+    for(int i = 0; i < nw; i++) f[i] = 0;
 }
 
 BF::BF(int count, std::mt19937&random_engine)
@@ -218,10 +219,76 @@ void BF::ANFPrint()
             }
         }
     }
+    std::cout<<std::endl;
 }
 
 
-void lab1(std::mt19937&random_engine) {
+
+int BF::GetDegree()
+{
+    int currentDegree = this -> n;
+    int currentMonom = pow2(this->n) - 1;
+    while(currentDegree > 0) 
+    {
+        /*int shift = 0;
+        int step = 1 << (currentDegree - 1);
+        while(currentMonom <= monomCount)
+        {
+            std::cout<<"monom = "<< currentMonom<<std::endl;
+            if(f[currentMonom / base_size] & (1 << (currentMonom % base_size))) return currentDegree;
+        
+            currentMonom += (step >> shift);
+            shift++;
+            if(shift == currentDegree)
+            {
+                step <<= 1;
+                shift = 0;
+            }
+        }
+        currentDegree --;
+        currentMonom = pow2(currentDegree) - 1;*/
+
+        if(GetDegreeRec(currentMonom, currentDegree - 1, this -> n, currentDegree - 2)) return currentDegree;
+        currentDegree--;
+        currentMonom = pow2(currentDegree) - 1;
+    }
+    return 0;
+}
+
+int BF::GetDegreeForce()
+{
+    int monomCount = pow2(this->n) - 1;
+    int maxDegree = 0;
+    if(f[monomCount / base_size] & (1 << (monomCount % base_size))) 
+        return this->n;
+    for(int currentMonom = monomCount; currentMonom >= 0; currentMonom--)
+    {
+        if(f[currentMonom / base_size] & (1 << (currentMonom % base_size)))
+        {
+            int degree = 0;
+            int monom = currentMonom;
+            while(monom > 0)
+            {
+                monom &= (monom - 1);
+                degree++;
+            }
+            if(degree > maxDegree) maxDegree = degree;
+        }
+    }
+    return maxDegree;
+}
+
+bool BF::GetDegreeRec(int currentMonom, int shift, int leftLimit, int rightLimit)
+{
+    if(f[currentMonom / base_size] & (1 << (currentMonom % base_size))) return true;
+    if((shift + 1) < leftLimit) return GetDegreeRec(currentMonom + (1 << shift), shift + 1, leftLimit, rightLimit);
+    if(rightLimit >= 0 && ((rightLimit + 1) < shift)) return GetDegreeRec(currentMonom + (1 << rightLimit), rightLimit + 1, shift, rightLimit - 1);
+    return false;
+}
+
+
+void lab1(std::mt19937&random_engine) 
+{
     for(int n = 2; n <= 10; n++){
         BF bf(n);
         int w = bf.GetWeight();
@@ -247,10 +314,28 @@ void lab1(std::mt19937&random_engine) {
 }
 
 void lab2(std::mt19937&random_engine) {
-    BF bf("00111000");
-    bf = bf.MobiusTransform();
-    std::cout<<bf<<std::endl;
-    bf.ANFPrint();
+    int bfCount = 250;
+    int n = 3;
+    BF** bf = new BF*[bfCount];
+    for(int i = 0; i < bfCount; i++)
+        bf[i] = new BF(n, random_engine);
+    std::chrono::steady_clock::time_point timePoint1 = std::chrono::steady_clock::now();
+    for(int i = 0; i < bfCount; i++)
+    {
+        bf[i]->GetDegree();
+    }
+    std::chrono::steady_clock::time_point timePoint2 = std::chrono::steady_clock::now();
+    for(int i = 0; i < bfCount; i++)
+    {
+        bf[i]->GetDegreeForce();
+    }
+    std::chrono::steady_clock::time_point timePoint3 = std::chrono::steady_clock::now();
+    for(int i = 0; i < bfCount; i++)
+    {
+        if(bf[i]->GetDegreeForce() != bf[i]->GetDegree()) throw "the results of the two methods are not identical";
+    }
+    std::cout << "GetDegreeTime = " << std::chrono::duration_cast<std::chrono::nanoseconds>(timePoint2 - timePoint1).count() << std::endl;
+    std::cout << "GetDegreeForceTime = " << std::chrono::duration_cast<std::chrono::nanoseconds> (timePoint3 - timePoint2).count() << std::endl;
 }
 
 int main()
@@ -258,8 +343,8 @@ int main()
     std::mt19937 random_engine;
     random_engine.seed(std::time(nullptr));
 
-    //BF bf("1010");
-    //std::cout<<bf;
+    //BF bf("1000");
+    //std::cout<<bf.GetDegree();
 
     lab2(random_engine);
 }
