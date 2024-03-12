@@ -14,10 +14,11 @@ typedef unsigned int base;
 //int Log2(int n);
 
 class BF {
-    private :
-        unsigned int n,
+    public :
+        base n,
         nw;
-        unsigned int* f;
+        base* f;
+        bool isANF = false;
     public:
         BF();
         BF(int count, std::mt19937&);
@@ -28,14 +29,16 @@ class BF {
         friend std::ostream & operator <<(std::ostream &, BF &);
         BF& operator =(const BF &);
         bool operator ==(BF &); 
+        bool operator !=(BF &);
         int GetWeight();
         ~BF();
         void ANFPrint();
-        BF MobiusTransform();
+        BF& MobiusTransform();
+        BF& MobiusTransform2();
         int GetDegree();
         int GetDegreeForce();
     private:
-        bool GetDegreeRec(int currentMonom, int shift, int leftLimit, int rightLimit);
+        bool GetDegreeRec(base currentMonom, int shift, int leftLimit, int rightLimit);
 };
 
 #endif 

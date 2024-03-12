@@ -6,15 +6,15 @@
 #include <chrono>
 
 
-unsigned int pow2(int n)
+base pow2(int n)
 {
     if(n < 1) return 1;
     return (1LL << n);
 }
 
-unsigned int Log2(int x)
+base Log2(base x)
 {
-    int n = 0;
+    base n = 0;
     while(x > 1)
     {
         n++;
@@ -27,7 +27,7 @@ BF::BF()
 {
     nw = 1;
     n = 1;
-    f = new unsigned int();
+    f = new base();
     for(int i = 0; i < nw; i++) f[i] = 0;
 }
 
@@ -36,14 +36,14 @@ BF::BF(int count, std::mt19937&random_engine)
     if(count<1) throw std::invalid_argument("The function must contain more than 1 variable");
     nw = pow2(count - maxN);
     n = count;
-    f = new unsigned int[nw];  
+    f = new base[nw];  
     for(int i = 0; i < nw; i++)
     {
         f[i] = random_engine();
     }
     if(n < maxN)
     {
-        unsigned int mask = 0xFFFFFFFF;
+        base mask = 0xFFFFFFFF;
         mask = ~(mask << pow2(n)); 
         f[0] &= mask;
     }
@@ -55,9 +55,9 @@ BF::BF(int count, bool isFilled = true)
 
     nw = pow2(count - maxN);
     n = count;
-    f = new unsigned int[nw];
+    f = new base[nw];
 
-    unsigned int mask = 0;
+    base mask = 0;
     
     if(isFilled){
         mask = 0xFFFFFFFF;
@@ -73,7 +73,7 @@ BF::BF(BF& bf_copy)
 {
     nw = bf_copy.nw;
     n = bf_copy.n;
-    f = new unsigned int[nw];
+    f = new base[nw];
     for(int i = 0; i < nw; i++)
     {
         f[i] = bf_copy.f[i];
@@ -87,9 +87,9 @@ BF::BF(std::string s)
     if(number_of_values & (number_of_values - 1) != 0) throw std::invalid_argument("Length must be a power of two");
     nw = ((number_of_values - 1) >> maxN) + 1;
     n = Log2(number_of_values - 1) + 1;
-    f = new unsigned int[nw];
+    f = new base[nw];
     for(int i = 0; i < nw; i++) f[i] = 0;
-    unsigned int mask = 1;
+    base mask = 1;
     for(int i = 0; i < number_of_values; i++)
     {
         mask = 1 << (i % base_size);
@@ -98,18 +98,18 @@ BF::BF(std::string s)
     }
 }
 
-BF::BF(std::list<unsigned int>& anf)
+BF::BF(std::list<base>& anf)
 {
-    unsigned int num = anf.back();
+    base num = anf.back();
     n = Log2(num) + 1;
     nw = (num >> maxN) + 1;   
-    f = new unsigned int[nw];
+    f = new base[nw];
     for(int i = 0; i < nw; i++) {
         f[i] = 0;
     }
     for(auto const &x: anf)
     {
-        f[x >> maxN] |= (((unsigned int)1) << (x % base_size));
+        f[x >> maxN] |= (((base)1) << (x % base_size));
     }
 }
 
@@ -120,8 +120,8 @@ BF::~BF()
 
 std::ostream& operator <<(std::ostream &out, BF& bf)
 {
-    unsigned int bits = pow2(bf.n);
-    unsigned int mask = 1;
+    base bits = pow2(bf.n);
+    base mask = 1;
     out<<"f = (";
     for(int i = 0; i < bits; i++)
     {
@@ -137,7 +137,7 @@ BF& BF::operator =(const BF& bf)
 {
     n = bf.n;
     nw = bf.nw;
-    f = new unsigned int[nw];
+    f = new base[nw];
     for(int i = 0; i < nw; i++)
     {
         f[i] = bf.f[i];
@@ -155,9 +155,14 @@ bool BF::operator ==(BF& bf)
     return true;
 }
 
+bool BF::operator!=(BF& bf)
+{
+    return !(*this == bf);
+}
+
 int BF::GetWeight()
 {
-    unsigned int no_low_bit,
+    base no_low_bit,
         weight = 0;
     for(int i = 0; i < nw; i++)
     {
@@ -171,20 +176,19 @@ int BF::GetWeight()
     return weight;
 }
 
-BF BF::MobiusTransform()
+BF& BF::MobiusTransform()
 {
-    BF res(this->n, false);
-
-    int count = pow2(n);
-    
-    unsigned int* fCopy = new unsigned int[nw];
+    base count = pow2(n);
+    base* fCopy = new base[nw];
     for(int i = 0; i < nw; i++)
-        fCopy[i] = this->f[i];
-    
-    res.f[0] |= (fCopy[0] & 1);
-    for(int i = 1; i < count; i++) 
     {
-        unsigned int bit = 0;
+        fCopy[i] = this->f[i];
+        this->f[i] = 0;
+    }
+    this->f[0] |= (fCopy[0] & 1);
+    for(base i = 1; i < count; i++) 
+    {
+        base bit = 0;
         for(int j = 0; j < nw - 1; j++) 
         {
             bit = fCopy[j + 1] & 1;
@@ -192,22 +196,36 @@ BF BF::MobiusTransform()
         }
         fCopy[nw - 1] = fCopy[nw - 1] ^ (fCopy[nw - 1] >> 1);
 
-        res.f[i/base_size] |= ((fCopy[0] & 1) << (i % base_size));
+        this->f[i/base_size] |= ((fCopy[0] & 1) << (i % base_size));
     }
-    return res;
+    return *this;
+}
+
+BF& BF::MobiusTransform2() 
+{
+    for(int i = nw - 1; i >= 0; i--)
+    {
+        
+        f[i] ^= (f[i] << 1) & 0xAAAAAAAA;
+        f[i] ^= (f[i] << 2) & 0xCCCCCCCC;
+        f[i] ^= (f[i] << 4) & 0xF0F0F0F0;
+        f[i] ^= (f[i] << 8) & 0xFF00FF00;
+        f[i] ^= (f[i] << 16) & 0xFFFF0000;
+    }
+    return *this;
 }
 
 
 void BF::ANFPrint()
 {
-    int monomialCount = pow2(n);
+    base monomialCount = pow2(n);
     bool isPrinted = false;
     if(f[0] & 1) 
     {
         std::cout<<"1";
         isPrinted = true;
     }
-    for(int i = 1; i < monomialCount; i++)
+    for(base i = 1; i < monomialCount; i++)
     {
         if(f[i / base_size] & (1 << (i % base_size))) 
         {
@@ -226,28 +244,11 @@ void BF::ANFPrint()
 
 int BF::GetDegree()
 {
+    isANF = !isANF;
     int currentDegree = this -> n;
-    int currentMonom = pow2(this->n) - 1;
+    base currentMonom = pow2(this->n) - 1;
     while(currentDegree > 0) 
     {
-        /*int shift = 0;
-        int step = 1 << (currentDegree - 1);
-        while(currentMonom <= monomCount)
-        {
-            std::cout<<"monom = "<< currentMonom<<std::endl;
-            if(f[currentMonom / base_size] & (1 << (currentMonom % base_size))) return currentDegree;
-        
-            currentMonom += (step >> shift);
-            shift++;
-            if(shift == currentDegree)
-            {
-                step <<= 1;
-                shift = 0;
-            }
-        }
-        currentDegree --;
-        currentMonom = pow2(currentDegree) - 1;*/
-
         if(GetDegreeRec(currentMonom, currentDegree - 1, this -> n, currentDegree - 2)) return currentDegree;
         currentDegree--;
         currentMonom = pow2(currentDegree) - 1;
@@ -257,7 +258,8 @@ int BF::GetDegree()
 
 int BF::GetDegreeForce()
 {
-    int monomCount = pow2(this->n) - 1;
+    isANF = !isANF;
+    base monomCount = pow2(this->n) - 1;
     int maxDegree = 0;
     if(f[monomCount / base_size] & (1 << (monomCount % base_size))) 
         return this->n;
@@ -278,7 +280,7 @@ int BF::GetDegreeForce()
     return maxDegree;
 }
 
-bool BF::GetDegreeRec(int currentMonom, int shift, int leftLimit, int rightLimit)
+bool BF::GetDegreeRec(base currentMonom, int shift, int leftLimit, int rightLimit)
 {
     if(f[currentMonom / base_size] & (1 << (currentMonom % base_size))) return true;
     if((shift + 1) < leftLimit) return GetDegreeRec(currentMonom + (1 << shift), shift + 1, leftLimit, rightLimit);
@@ -298,7 +300,7 @@ void lab1(std::mt19937&random_engine)
     for(int n = 1; n < 10; n++){
         BF bf(5, random_engine);
         int w = bf.GetWeight();
-        unsigned int sqrn = pow2(5);
+        base sqrn = pow2(5);
         double kn = (double)w / sqrn;   
         std::cout<<bf<<std::endl;
     }
@@ -306,19 +308,37 @@ void lab1(std::mt19937&random_engine)
    /* for(int n = 2; n < 32; n++){
         BF bf(n, random_engine);
         int w = bf.GetWeight();
-        unsigned int sqrn = pow2(n);
+        base sqrn = pow2(n);
         double kn = (double)w / sqrn;
         std::cout<< n << ": "<< w <<"/"<< sqrn<< " = " << kn<<std::endl;     
         //std::cout<<bf<<std::endl;
     }*/
 }
 
-void lab2(std::mt19937&random_engine) {
-    int bfCount = 250;
-    int n = 3;
+bool mobiusTransformTest(std::mt19937&random_engine) 
+{
+    int count = 1;
+    for(int i = 0; i < count; i++)
+    {
+        int n = 31;
+        BF bf(n, random_engine);
+        BF bfCopy = bf;
+        std::cout<<(bf.nw >> 18);
+       // if(bf.MobiusTransform().MobiusTransform() != bfCopy) 
+            return false;
+    }
+    return true;
+}
+
+void compareGetDegreeMethods(std::mt19937&random_engine) {
+    int bfCount = 10;
+    int n = 18;
     BF** bf = new BF*[bfCount];
     for(int i = 0; i < bfCount; i++)
-        bf[i] = new BF(n, random_engine);
+    {
+        bf[i] = new BF(n);
+        bf[i]->MobiusTransform();
+    }
     std::chrono::steady_clock::time_point timePoint1 = std::chrono::steady_clock::now();
     for(int i = 0; i < bfCount; i++)
     {
@@ -338,13 +358,31 @@ void lab2(std::mt19937&random_engine) {
     std::cout << "GetDegreeForceTime = " << std::chrono::duration_cast<std::chrono::nanoseconds> (timePoint3 - timePoint2).count() << std::endl;
 }
 
+void lab2(std::mt19937&random_engine)
+{
+    BF bf(6);
+    std::cout<<bf<<bf.MobiusTransform();
+    bf = BF(6, false);
+    std::cout<<bf<<bf.MobiusTransform();
+
+    if(mobiusTransformTest(random_engine)) std::cout<<"passed"<<std::endl;
+    else std::cout<<"not passed"<<std::endl;
+
+    bf = BF(31, random_engine);
+    std::chrono::steady_clock::time_point timePoint1 = std::chrono::steady_clock::now();
+    bf = bf.MobiusTransform();
+    std::chrono::steady_clock::time_point timePoint2 = std::chrono::steady_clock::now();
+    std::cout << "t(u) = " << std::chrono::duration_cast<std::chrono::milliseconds>(timePoint2 - timePoint1).count() << std::endl;
+}
+
 int main()
 {
     std::mt19937 random_engine;
     random_engine.seed(std::time(nullptr));
-
-    //BF bf("1000");
-    //std::cout<<bf.GetDegree();
-
-    lab2(random_engine);
+    //compareGetDegreeMethods(random_engine);
+    BF bf(5, random_engine);
+    BF bfcopy(bf);
+    std::cout<<bf.MobiusTransform()<<std::endl;
+    std::cout<<bfcopy.MobiusTransform2()<<std::endl;
+    //mobiusTransformTest(random_engine);
 }
