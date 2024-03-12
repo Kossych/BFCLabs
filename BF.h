@@ -12,6 +12,7 @@ typedef unsigned int base;
 
 //int sqrt2(int n);
 //int Log2(int n);
+const unsigned int MOBIUS_CONSTS[5] = {0xAAAAAAAA, 0xCCCCCCCC, 0xF0F0F0F0, 0xFF00FF00, 0xFFFF0000};
 
 class BF {
     public :
@@ -25,7 +26,6 @@ class BF {
         BF(int count, bool);
         BF(BF &); 
         BF(std::string s);
-        BF(std::list<unsigned int>&);
         friend std::ostream & operator <<(std::ostream &, BF &);
         BF& operator =(const BF &);
         bool operator ==(BF &); 

@@ -98,21 +98,6 @@ BF::BF(std::string s)
     }
 }
 
-BF::BF(std::list<base>& anf)
-{
-    base num = anf.back();
-    n = Log2(num) + 1;
-    nw = (num >> maxN) + 1;   
-    f = new base[nw];
-    for(int i = 0; i < nw; i++) {
-        f[i] = 0;
-    }
-    for(auto const &x: anf)
-    {
-        f[x >> maxN] |= (((base)1) << (x % base_size));
-    }
-}
-
 BF::~BF()
 {
     delete[]f;
@@ -203,14 +188,24 @@ BF& BF::MobiusTransform()
 
 BF& BF::MobiusTransform2() 
 {
-    for(int i = nw - 1; i >= 0; i--)
+    std::string val = "01010000100011011101011110001110";
+    int maxStep = n <= maxN ? n: maxN;
+    for(int step = 0, shift = 1; step < maxStep; step++, shift <<= 1)
     {
-        
-        f[i] ^= (f[i] << 1) & 0xAAAAAAAA;
-        f[i] ^= (f[i] << 2) & 0xCCCCCCCC;
-        f[i] ^= (f[i] << 4) & 0xF0F0F0F0;
-        f[i] ^= (f[i] << 8) & 0xFF00FF00;
-        f[i] ^= (f[i] << 16) & 0xFFFF0000;
+        for(int i = nw - 1; i >= 0; i--) 
+        {
+            f[i] ^= ((f[i] << shift) & MOBIUS_CONSTS[step]);
+        }
+    }
+    for(int step = maxN, shift = 1; step < n; step++, shift <<= 1)
+    {
+        for(int i = nw - 1; i > 0; i -= (shift << 1))
+        {
+            for(int j = 0; j < shift; j++)
+            {
+                f[i - j] ^= f[i - j - shift];
+            }
+        }
     }
     return *this;
 }
@@ -324,7 +319,7 @@ bool mobiusTransformTest(std::mt19937&random_engine)
         BF bf(n, random_engine);
         BF bfCopy = bf;
         std::cout<<(bf.nw >> 18);
-       // if(bf.MobiusTransform().MobiusTransform() != bfCopy) 
+        if(bf.MobiusTransform2().MobiusTransform2() != bfCopy) 
             return false;
     }
     return true;
@@ -380,9 +375,7 @@ int main()
     std::mt19937 random_engine;
     random_engine.seed(std::time(nullptr));
     //compareGetDegreeMethods(random_engine);
-    BF bf(5, random_engine);
-    BF bfcopy(bf);
-    std::cout<<bf.MobiusTransform()<<std::endl;
-    std::cout<<bfcopy.MobiusTransform2()<<std::endl;
-    //mobiusTransformTest(random_engine);
+    //BF bf(7, random_engine);
+    //BF bfcopy(bf);
+    if(mobiusTransformTest(random_engine)) std::cout<<"success";
 }
