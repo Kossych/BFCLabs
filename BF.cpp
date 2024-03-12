@@ -34,6 +34,7 @@ BF::BF()
 BF::BF(int count, std::mt19937&random_engine)
 {
     if(count<1) throw std::invalid_argument("The function must contain more than 1 variable");
+    if(count > base_size)  throw std::invalid_argument("This length is not supported. Replace base with a larger data type");
     nw = pow2(count - maxN);
     n = count;
     f = new base[nw];  
@@ -43,7 +44,7 @@ BF::BF(int count, std::mt19937&random_engine)
     }
     if(n < maxN)
     {
-        base mask = 0xFFFFFFFF;
+        base mask = ~0;
         mask = ~(mask << pow2(n)); 
         f[0] &= mask;
     }
@@ -52,6 +53,7 @@ BF::BF(int count, std::mt19937&random_engine)
 BF::BF(int count, bool isFilled = true)
 {   
     if(count < 1) throw std::invalid_argument("The function must contain more than 1 variable");
+    if(count > base_size)  throw std::invalid_argument("This length is not supported. Replace base with a larger data type");
 
     nw = pow2(count - maxN);
     n = count;
@@ -60,7 +62,7 @@ BF::BF(int count, bool isFilled = true)
     base mask = 0;
     
     if(isFilled){
-        mask = 0xFFFFFFFF;
+        mask = ~0;
     }
 
     for(int i = 0; i < nw; i++) f[i] = mask;
@@ -83,6 +85,7 @@ BF::BF(BF& bf_copy)
 BF::BF(std::string s)
 {
     int number_of_values = s.length();
+    if(number_of_values > base_size) throw std::invalid_argument("The length of this function is not supported. Replace base with a larger data type");
     if(number_of_values < 1) throw std::invalid_argument("Incorrect string");
     if(number_of_values & (number_of_values - 1) != 0) throw std::invalid_argument("Length must be a power of two");
     nw = ((number_of_values - 1) >> maxN) + 1;
@@ -188,7 +191,6 @@ BF& BF::MobiusTransform()
 
 BF& BF::MobiusTransform2() 
 {
-    std::string val = "01010000100011011101011110001110";
     int maxStep = n <= maxN ? n: maxN;
     for(int step = 0, shift = 1; step < maxStep; step++, shift <<= 1)
     {
@@ -312,13 +314,12 @@ void lab1(std::mt19937&random_engine)
 
 bool mobiusTransformTest(std::mt19937&random_engine) 
 {
-    int count = 1;
+    int count = 5;
     for(int i = 0; i < count; i++)
     {
-        int n = 31;
+        int n = 25;
         BF bf(n, random_engine);
         BF bfCopy = bf;
-        std::cout<<(bf.nw >> 18);
         if(bf.MobiusTransform2().MobiusTransform2() != bfCopy) 
             return false;
     }
@@ -326,13 +327,13 @@ bool mobiusTransformTest(std::mt19937&random_engine)
 }
 
 void compareGetDegreeMethods(std::mt19937&random_engine) {
-    int bfCount = 10;
-    int n = 18;
+    int bfCount = 250;
+    int n = 12;
     BF** bf = new BF*[bfCount];
     for(int i = 0; i < bfCount; i++)
     {
-        bf[i] = new BF(n);
-        bf[i]->MobiusTransform();
+        bf[i] = new BF(n, false);
+        bf[i]->MobiusTransform2();
     }
     std::chrono::steady_clock::time_point timePoint1 = std::chrono::steady_clock::now();
     for(int i = 0; i < bfCount; i++)
@@ -355,7 +356,7 @@ void compareGetDegreeMethods(std::mt19937&random_engine) {
 
 void lab2(std::mt19937&random_engine)
 {
-    BF bf(6);
+        BF bf(6);
     std::cout<<bf<<bf.MobiusTransform();
     bf = BF(6, false);
     std::cout<<bf<<bf.MobiusTransform();
@@ -363,9 +364,9 @@ void lab2(std::mt19937&random_engine)
     if(mobiusTransformTest(random_engine)) std::cout<<"passed"<<std::endl;
     else std::cout<<"not passed"<<std::endl;
 
-    bf = BF(31, random_engine);
+    bf = BF(25, random_engine);
     std::chrono::steady_clock::time_point timePoint1 = std::chrono::steady_clock::now();
-    bf = bf.MobiusTransform();
+    bf = bf.MobiusTransform2();
     std::chrono::steady_clock::time_point timePoint2 = std::chrono::steady_clock::now();
     std::cout << "t(u) = " << std::chrono::duration_cast<std::chrono::milliseconds>(timePoint2 - timePoint1).count() << std::endl;
 }
@@ -374,8 +375,8 @@ int main()
 {
     std::mt19937 random_engine;
     random_engine.seed(std::time(nullptr));
+    lab2(random_engine);
     //compareGetDegreeMethods(random_engine);
     //BF bf(7, random_engine);
     //BF bfcopy(bf);
-    if(mobiusTransformTest(random_engine)) std::cout<<"success";
 }
