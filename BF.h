@@ -28,7 +28,7 @@ class BF {
         BF(std::string s);
         friend std::ostream & operator <<(std::ostream &, BF &);
         BF& operator =(const BF &);
-        bool operator ==(BF &); 
+        bool operator ==(const BF &); 
         bool operator !=(BF &);
         int GetWeight();
         ~BF();

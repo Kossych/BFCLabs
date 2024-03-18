@@ -123,6 +123,8 @@ std::ostream& operator <<(std::ostream &out, BF& bf)
 
 BF& BF::operator =(const BF& bf)
 {
+    if(*this == bf) return *this;
+    delete[]f;
     n = bf.n;
     nw = bf.nw;
     f = new base[nw];
@@ -133,7 +135,7 @@ BF& BF::operator =(const BF& bf)
     return *this;
 }
 
-bool BF::operator ==(BF& bf)
+bool BF::operator ==(const BF& bf)
 {
     if(n != bf.n || nw != bf.nw) return false;
     for(int i = 0; i < nw; i++)
@@ -260,7 +262,7 @@ int BF::GetDegreeForce()
     int maxDegree = 0;
     if(f[monomCount / base_size] & (1 << (monomCount % base_size))) 
         return this->n;
-    for(int currentMonom = monomCount; currentMonom >= 0; currentMonom--)
+    for(base currentMonom = monomCount - 1; currentMonom > 0; currentMonom--)
     {
         if(f[currentMonom / base_size] & (1 << (currentMonom % base_size)))
         {
@@ -328,38 +330,43 @@ bool mobiusTransformTest(std::mt19937&random_engine)
 
 void compareGetDegreeMethods(std::mt19937&random_engine) {
     int bfCount = 250;
-    int n = 12;
+    int n = 25;
     BF** bf = new BF*[bfCount];
     for(int i = 0; i < bfCount; i++)
     {
-        bf[i] = new BF(n, false);
+        bf[i] = new BF(n, true);
         bf[i]->MobiusTransform2();
     }
+    std::cout<<"*"<<std::endl;
     std::chrono::steady_clock::time_point timePoint1 = std::chrono::steady_clock::now();
     for(int i = 0; i < bfCount; i++)
     {
         bf[i]->GetDegree();
     }
     std::chrono::steady_clock::time_point timePoint2 = std::chrono::steady_clock::now();
+
+    std::cout << "GetDegreeTime = " << std::chrono::duration_cast<std::chrono::nanoseconds>(timePoint2 - timePoint1).count() << std::endl;
+    timePoint1 = std::chrono::steady_clock::now();
     for(int i = 0; i < bfCount; i++)
     {
         bf[i]->GetDegreeForce();
     }
-    std::chrono::steady_clock::time_point timePoint3 = std::chrono::steady_clock::now();
+    timePoint2 = std::chrono::steady_clock::now();
+    std::cout << "GetDegreeForceTime = " << std::chrono::duration_cast<std::chrono::nanoseconds> (timePoint2 - timePoint1).count() << std::endl;
+
     for(int i = 0; i < bfCount; i++)
     {
         if(bf[i]->GetDegreeForce() != bf[i]->GetDegree()) throw "the results of the two methods are not identical";
     }
-    std::cout << "GetDegreeTime = " << std::chrono::duration_cast<std::chrono::nanoseconds>(timePoint2 - timePoint1).count() << std::endl;
-    std::cout << "GetDegreeForceTime = " << std::chrono::duration_cast<std::chrono::nanoseconds> (timePoint3 - timePoint2).count() << std::endl;
+    
 }
 
 void lab2(std::mt19937&random_engine)
 {
-        BF bf(6);
-    std::cout<<bf<<bf.MobiusTransform();
+    BF bf(6);
+    //std::cout<<bf<<bf.MobiusTransform();
     bf = BF(6, false);
-    std::cout<<bf<<bf.MobiusTransform();
+    //std::cout<<bf<<bf.MobiusTransform();
 
     if(mobiusTransformTest(random_engine)) std::cout<<"passed"<<std::endl;
     else std::cout<<"not passed"<<std::endl;
@@ -375,8 +382,10 @@ int main()
 {
     std::mt19937 random_engine;
     random_engine.seed(std::time(nullptr));
-    lab2(random_engine);
-    //compareGetDegreeMethods(random_engine);
-    //BF bf(7, random_engine);
-    //BF bfcopy(bf);
+    BF bf(3, false);
+    //bf.MobiusTransform2();
+    //bf.ANFPrint();
+    //std::cout<<bf.GetDegree();
+    //lab2(random_engine);
+    compareGetDegreeMethods(random_engine);
 }
