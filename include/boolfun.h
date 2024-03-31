@@ -8,6 +8,7 @@
 #include <bitset>
 #include <ctime>
 #include <iterator>
+#include <vector>
 
 typedef unsigned int base;
 
@@ -16,6 +17,8 @@ typedef unsigned int base;
 
 base pow2(int n);
 base Log2(base x);
+base getNextC(base prev);
+
 const unsigned int MOBIUS_CONSTS[5] = {0xAAAAAAAA, 0xCCCCCCCC, 0xF0F0F0F0, 0xFF00FF00, 0xFFFF0000};
 
 class BF {
@@ -27,7 +30,8 @@ class BF {
     public:
         BF();
         BF(int count, std::mt19937&);
-        BF(int count, bool = true);
+        BF(int count, bool);
+        BF(base funValue);
         BF(BF &); 
         BF(std::string s);
         friend std::ostream & operator <<(std::ostream &, BF &);
@@ -40,6 +44,8 @@ class BF {
         BF& MobiusTransform();
         int GetDegree();
         int GetDegreeForce();
+        std::vector<short> walshAdamar();
+        base cor();
     private:
         bool GetDegreeRec(base currentMonom, int shift, int leftLimit, int rightLimit);
 };

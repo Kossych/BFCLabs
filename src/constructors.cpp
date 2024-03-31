@@ -48,6 +48,13 @@ BF::BF(int count, bool isFilled)
     }
 }
 
+BF::BF(base funValue)
+{
+    this->n = maxN;
+    this->nw = 1;
+    this->f = new base(funValue);
+}
+
 BF::BF(BF& bf_copy)
 {
     nw = bf_copy.nw;

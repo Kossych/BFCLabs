@@ -3,7 +3,7 @@
 int main() {
     std::mt19937 random_engine;
     for(int n = 2; n <= 10; n++){
-        BF bf(n);
+        BF bf(n, true);
         int w = bf.GetWeight();
         std::cout<< n << ": "<< w << std::endl;
     }

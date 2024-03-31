@@ -49,7 +49,7 @@ void compareGetDegreeMethods(std::mt19937&random_engine) {
 
 int main() {
     std::mt19937 random_engine;
-    BF bf(6);
+    BF bf(6, true);
     //std::cout<<bf<<bf.MobiusTransform();
     bf = BF(6, false);
     //std::cout<<bf<<bf.MobiusTransform();
