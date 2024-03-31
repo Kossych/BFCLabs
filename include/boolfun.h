@@ -1,17 +1,21 @@
+#pragma once
 #ifndef BOOL_FUNCTION_H
 #define BOOL_FUNCTION_H
 
 #include <iostream>
-#include <list>
 #include <random>
+#include <chrono>
+#include <bitset>
+#include <ctime>
+#include <iterator>
+
+typedef unsigned int base;
 
 #define base_size (sizeof(base)*8)
 #define maxN int(Log2(base_size))
 
-typedef unsigned int base;
-
-//int sqrt2(int n);
-//int Log2(int n);
+base pow2(int n);
+base Log2(base x);
 const unsigned int MOBIUS_CONSTS[5] = {0xAAAAAAAA, 0xCCCCCCCC, 0xF0F0F0F0, 0xFF00FF00, 0xFFFF0000};
 
 class BF {
@@ -23,7 +27,7 @@ class BF {
     public:
         BF();
         BF(int count, std::mt19937&);
-        BF(int count, bool);
+        BF(int count, bool = true);
         BF(BF &); 
         BF(std::string s);
         friend std::ostream & operator <<(std::ostream &, BF &);
@@ -34,7 +38,6 @@ class BF {
         ~BF();
         void ANFPrint();
         BF& MobiusTransform();
-        BF& MobiusTransform2();
         int GetDegree();
         int GetDegreeForce();
     private:
