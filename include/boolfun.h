@@ -9,6 +9,7 @@
 #include <ctime>
 #include <iterator>
 #include <vector>
+#include <algorithm>
 
 typedef unsigned int base;
 
@@ -46,6 +47,8 @@ class BF {
         int GetDegreeForce();
         std::vector<short> walshAdamar();
         base cor();
+        base nonlinearity();
+        std::vector<base> bestAffineApprox();
     private:
         bool GetDegreeRec(base currentMonom, int shift, int leftLimit, int rightLimit);
 };

@@ -18,11 +18,24 @@ base EXPECTED_COR_VALUE[11] =
 
 int main() 
 {
-    for(int i = 0; i < 11; i ++) 
+    /*for(int i = 0; i < 11; i ++) 
     {
         BF bf(TEST_FUNC_VALUE[i]);
         if(bf.cor() != EXPECTED_COR_VALUE[i]) {
-            throw "error";
+        throw "error";
         }
+    }*/
+    /*BF f("1010101001010101");
+    BF fcopy = f;
+    f.MobiusTransform();
+    std::cout<<std::endl;
+    f.ANFPrint();*/
+    BF f("10110011");
+    std::cout<<std::endl;
+    std::cout<< "nonlinearity: " << f.nonlinearity() << std::endl;
+    auto baa = f.bestAffineApprox();
+    for(auto it: baa) {
+        BF f(it);
+        f.ANFPrint();
     }
 }

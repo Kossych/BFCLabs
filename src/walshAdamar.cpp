@@ -1,8 +1,8 @@
 #include "../include/boolfun.h"
 
-std::vector<int> BF::walshAdamar() {
+std::vector<short> BF::walshAdamar() {
     base monomCount = pow2(n);
-    std::vector<int> char_vec = std::vector<int>(monomCount);
+    std::vector<short> char_vec = std::vector<short>(monomCount);
     for(base i = 0; i < monomCount; i++) {
         switch((f[i / base_size] & (1 << (i % base_size))) == 0) {
             case true: 
@@ -34,4 +34,43 @@ base BF::cor() {
         }
     }
     return this->n;
+}
+
+base BF::nonlinearity() {
+    auto waTransformation = this->walshAdamar();
+    for(int i = 0; i < waTransformation.size(); i++) {
+        if(waTransformation[i] < 0) {
+            waTransformation[i] *= -1;
+        }
+    }
+    std::sort(waTransformation.begin(), waTransformation.end());
+
+    return (1 << (this->n - 1)) - (waTransformation[0]) >> 1;
+}
+
+std::vector<base> BF::bestAffineApprox() {
+    auto waTransformation = this->walshAdamar();
+    base maxAbs = 0;
+    for(auto it: waTransformation) {
+        auto abs = std::abs(it);
+        if(maxAbs < abs) {
+            maxAbs = abs;
+        }
+    }
+    
+    auto result = std::vector<base>();
+    base lastValue = 1 << this->n;
+    for(base funValue = 0; funValue < lastValue; funValue++) {
+        if(maxAbs == std::abs(waTransformation[funValue])) {
+            base baa = 0;
+            if(waTransformation[funValue] < 0) baa |= 1;
+            for(base monom = 0; monom < this->n; monom++) {
+                if((funValue & (1 << monom)) != 0) {
+                    baa |= (1 << monom);
+                }
+            }
+            result.push_back(baa);
+        }
+    }
+    return result;
 }
