@@ -30,12 +30,17 @@ int main()
     f.MobiusTransform();
     std::cout<<std::endl;
     f.ANFPrint();*/
-    BF f("10110011");
+    BF f("00001111");
     std::cout<<std::endl;
     std::cout<< "nonlinearity: " << f.nonlinearity() << std::endl;
-    auto baa = f.bestAffineApprox();
+    /*auto baa = f.bestAffineApprox();
     for(auto it: baa) {
         BF f(it);
         f.ANFPrint();
+    }*/
+
+    auto autocor = f.autoCor();
+    for(auto it: autocor) {
+        std::cout<<it<<" ";
     }
 }

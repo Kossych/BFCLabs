@@ -57,15 +57,14 @@ std::vector<base> BF::bestAffineApprox() {
             maxAbs = abs;
         }
     }
-    
     auto result = std::vector<base>();
     base lastValue = 1 << this->n;
-    for(base funValue = 0; funValue < lastValue; funValue++) {
-        if(maxAbs == std::abs(waTransformation[funValue])) {
+    for(base monomValue = 0; monomValue < lastValue; monomValue++) {
+        if(maxAbs == std::abs(waTransformation[monomValue])) {
             base baa = 0;
-            if(waTransformation[funValue] < 0) baa |= 1;
+            if(waTransformation[monomValue] < 0) baa |= 1;
             for(base monom = 0; monom < this->n; monom++) {
-                if((funValue & (1 << monom)) != 0) {
+                if((monomValue & (1 << monom))) {
                     baa |= (1 << monom);
                 }
             }
@@ -73,4 +72,29 @@ std::vector<base> BF::bestAffineApprox() {
         }
     }
     return result;
+}
+
+std::vector<short> BF::autoCor() {
+    auto autoCorVec = this->walshAdamar();
+
+    for(int i = 0; i < autoCorVec.size(); i++) {
+        autoCorVec[i] *= autoCorVec[i];
+    }
+
+    for(int step = 1; step < autoCorVec.size(); step <<= 1) {
+        for(int i = 0; i < autoCorVec.size(); i += (step << 1)) {
+            for(int j = 0; j < step; j++) {
+                autoCorVec[i + j] += autoCorVec[i + j + step];
+                autoCorVec[i + j + step] = autoCorVec[i + j] - (autoCorVec[i + j + step] << 1);
+            }
+        }
+    }
+
+    base d = Log2(autoCorVec.size() + 1);
+
+    for(int i = 0; i < autoCorVec.size(); i++) {
+        autoCorVec[i] /= (1 << d);
+    }
+    
+    return autoCorVec;
 }

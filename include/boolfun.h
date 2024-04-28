@@ -18,6 +18,7 @@ typedef unsigned int base;
 
 base pow2(int n);
 base Log2(base x);
+base weight(base x);
 base getNextC(base prev);
 
 const unsigned int MOBIUS_CONSTS[5] = {0xAAAAAAAA, 0xCCCCCCCC, 0xF0F0F0F0, 0xFF00FF00, 0xFFFF0000};
@@ -49,6 +50,9 @@ class BF {
         base cor();
         base nonlinearity();
         std::vector<base> bestAffineApprox();
+        std::vector<bool> linearVariables();
+        std::vector<bool> dummyVariables();
+        std::vector<short> autoCor();
     private:
         bool GetDegreeRec(base currentMonom, int shift, int leftLimit, int rightLimit);
 };
