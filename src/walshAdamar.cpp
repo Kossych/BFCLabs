@@ -58,14 +58,14 @@ std::vector<base> BF::bestAffineApprox() {
         }
     }
     auto result = std::vector<base>();
-    base lastValue = 1 << this->n;
-    for(base monomValue = 0; monomValue < lastValue; monomValue++) {
-        if(maxAbs == std::abs(waTransformation[monomValue])) {
+    base lastValue = waTransformation.size();
+    for(base value = 0; value < lastValue; value++) {
+        if(maxAbs == std::abs(waTransformation[value])) {
             base baa = 0;
-            if(waTransformation[monomValue] < 0) baa |= 1;
-            for(base monom = 0; monom < this->n; monom++) {
-                if((monomValue & (1 << monom))) {
-                    baa |= (1 << monom);
+            if(waTransformation[value] < 0) baa |= 1;
+            for(base monomNumber = 0; monomNumber < this->n; monomNumber++) {
+                if((value & (1 << monomNumber))) {
+                    baa |= (1 << monomNumber);
                 }
             }
             result.push_back(baa);
