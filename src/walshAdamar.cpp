@@ -38,17 +38,18 @@ base BF::cor() {
 
 base BF::nonlinearity() {
     auto waTransformation = this->walshAdamar();
+    short maxAbsValue = 0;
     for(int i = 0; i < waTransformation.size(); i++) {
-        if(waTransformation[i] < 0) {
-            waTransformation[i] *= -1;
+        short absValue = waTransformation[i];
+        if(absValue < 0) absValue *= -1;
+        if(maxAbsValue < absValue) {
+            maxAbsValue = absValue;
         }
     }
-    std::sort(waTransformation.begin(), waTransformation.end());
-
-    return (1 << (this->n - 1)) - (waTransformation[0]) >> 1;
+    return (1 << (this->n - 1)) - ((maxAbsValue) >> 1);
 }
 
-std::vector<base> BF::bestAffineApprox() {
+std::vector<BF*> BF::bestAffineApprox() {
     auto waTransformation = this->walshAdamar();
     base maxAbs = 0;
     for(auto it: waTransformation) {
@@ -57,15 +58,15 @@ std::vector<base> BF::bestAffineApprox() {
             maxAbs = abs;
         }
     }
-    auto result = std::vector<base>();
+    auto result = std::vector<BF*>();
     base lastValue = waTransformation.size();
     for(base value = 0; value < lastValue; value++) {
         if(maxAbs == std::abs(waTransformation[value])) {
-            base baa = 0;
-            if(waTransformation[value] < 0) baa |= 1;
+            BF* baa = new BF(n, false);
+            if(waTransformation[value] < 0) baa->SetBit(0);
             for(base monomNumber = 0; monomNumber < this->n; monomNumber++) {
-                if((value & (1 << monomNumber))) {
-                    baa |= (1 << monomNumber);
+                if((value & (1 << (monomNumber)))) {
+                    baa->SetBit(1 << monomNumber);
                 }
             }
             result.push_back(baa);
@@ -90,10 +91,8 @@ std::vector<short> BF::autoCor() {
         }
     }
 
-    base d = Log2(autoCorVec.size() + 1);
-
     for(int i = 0; i < autoCorVec.size(); i++) {
-        autoCorVec[i] /= (1 << d);
+        autoCorVec[i] >>= n;
     }
     
     return autoCorVec;

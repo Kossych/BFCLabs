@@ -40,6 +40,7 @@ class BF {
         BF& operator =(const BF &);
         bool operator ==(const BF &); 
         bool operator !=(BF &);
+        void SetBit(base);
         int GetWeight();
         ~BF();
         void ANFPrint();
@@ -49,7 +50,7 @@ class BF {
         std::vector<short> walshAdamar();
         base cor();
         base nonlinearity();
-        std::vector<base> bestAffineApprox();
+        std::vector<BF*> bestAffineApprox();
         std::vector<bool> linearVariables();
         std::vector<bool> dummyVariables();
         std::vector<short> autoCor();

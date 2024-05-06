@@ -16,6 +16,10 @@ int BF::GetWeight()
     return weight;
 }
 
+void BF::SetBit(base bitNumber) {
+    f[bitNumber / base_size] |= 1 << (bitNumber % base_size);
+}
+
 base pow2(int n)
 {
     if(n < 1) return 1;

@@ -10,14 +10,10 @@ std::vector<bool> BF::linearVariables() {
     for(base value = 0; value < (1 << copy.n); value++) {
         if(copy.f[value / base_size] & (1 << (value % base_size))) {
             tmp |= value;
-            if(weight(value) != 1) {
+            if(weight(value) == 1) {
                 _tmp |= value;
             }
         }
-    }
-
-    for(int variableNum = 0; variableNum < copy.n; variableNum++) {
-        _tmp ^= (1 << variableNum);
     }
 
     tmp &= _tmp;
