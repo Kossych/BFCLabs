@@ -1,7 +1,7 @@
 #include "../include/boolfun.h"
 
 int main() {
-    BF f("11000011");
+    BF f("1100001111000011");
     BF fcopy(f);
     fcopy.MobiusTransform();
     fcopy.ANFPrint();

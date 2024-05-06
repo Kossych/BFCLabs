@@ -5,18 +5,14 @@ std::vector<bool> BF::linearVariables() {
     copy.MobiusTransform();
 
     base tmp = 0;
-    base _tmp = 0;
 
     for(base value = 0; value < (1 << copy.n); value++) {
-        if(copy.f[value / base_size] & (1 << (value % base_size))) {
-            tmp |= value;
+        if((copy.f[value / base_size] & (1 << (value % base_size))) && (weight(value) == 1)) {
             if(weight(value) == 1) {
-                _tmp |= value;
+                tmp |= value;
             }
         }
     }
-
-    tmp &= _tmp;
 
     auto isLinear = std::vector<bool>(copy.n);
 
